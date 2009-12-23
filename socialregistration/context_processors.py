@@ -1,3 +1,4 @@
+import urllib2
 from django.conf import settings
 from django.contrib.auth import logout
 
@@ -48,8 +49,12 @@ def get_avatar(request, profile):
             settings.HYVES_CONSUMER_SECRET_KEY,
             settings.HYVES_REQUEST_TOKEN_URL,
             )
-    
-        user_info = client.get_user_info()
+        
+        try:
+            user_info = client.get_user_info()
+        except urllib2.HTTPError:
+            return ''
+        
         avatar_url = user_info['avatar']
 
     return avatar_url
