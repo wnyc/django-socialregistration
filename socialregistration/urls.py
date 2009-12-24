@@ -6,12 +6,12 @@ Created on 22.09.2009
 from django.conf import settings
 from django.conf.urls.defaults import *
 
-
 urlpatterns = patterns('',
     url('^setup/$', 'socialregistration.views.setup',
         name='socialregistration_setup'),
 
-    url('^logout/$', 'socialregistration.views.logout',
+    url('^logout/$', 'django.contrib.auth.views.logout',
+        kwargs={'next_page': getattr(settings, 'LOGOUT_REDIRECT_URL', '/') },
         name='social_logout'),
 )
 

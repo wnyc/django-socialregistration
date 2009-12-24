@@ -146,18 +146,6 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     
     return HttpResponseRedirect(_get_next(request))
 
-def logout(request, redirect_url=None):
-    """
-    Logs the user out of facebook and django.
-    """
-    logout(request)
-    if getattr(request,'facebook',False):
-        request.facebook.session_key = None
-        request.facebook.uid = None
-    url = getattr(settings,'LOGOUT_REDIRECT_URL',redirect_url) or '/'
-    
-    return HttpResponseRedirect(url)
-
 def twitter(request):
     """
     Actually setup/login an account relating to a twitter user after the oauth 
