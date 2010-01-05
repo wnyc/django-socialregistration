@@ -9,14 +9,26 @@ from django.db import models
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-# Create your models here.
+from django.contrib.contenttypes.models import ContentType
 
-
-class FacebookProfile(models.Model):
+class SocialProfile(models.Model):
     user = models.ForeignKey(User)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
-    uid = models.CharField(max_length=255, blank=False, null=False)
     username = models.CharField(max_length=255)
+    type = models.ForeignKey(ContentType, editable=False)
+
+    def get_instance(self):
+        """ Returns the child instance """
+        return self.type.get_object_for_this_type(id=self.id)
+
+    def save(self, force_insert=False, force_update=False):
+        """ Custom save method so the child of the published item can be found """
+        if not hasattr(self,'type_ptr'):
+            self.type = ContentType.objects.get_for_model(self.__class__)
+        super(SocialProfile, self).save(force_insert, force_update)
+
+class FacebookProfile(SocialProfile):
+    uid = models.CharField(max_length=255, blank=False, null=False)
     
     def __unicode__(self):
         return '%s: %s' % (self.user, self.uid)
@@ -24,11 +36,8 @@ class FacebookProfile(models.Model):
     def authenticate(self):
         return authenticate(uid=self.uid)
 
-class TwitterProfile(models.Model):
-    user = models.ForeignKey(User)
-    site = models.ForeignKey(Site, default=Site.objects.get_current)
+class TwitterProfile(SocialProfile):
     twitter_id = models.PositiveIntegerField()
-    username = models.CharField(max_length=255)
     
     def __unicode__(self):
         return '%s: %s' % (self.user, self.twitter_id)
@@ -36,11 +45,8 @@ class TwitterProfile(models.Model):
     def authenticate(self):
         return authenticate(twitter_id=self.twitter_id)
 
-class HyvesProfile(models.Model):
-    user = models.ForeignKey(User)
-    site = models.ForeignKey(Site, default=Site.objects.get_current)
+class HyvesProfile(SocialProfile):
     hyves_id = models.CharField(max_length=255, blank=False, null=False)
-    username = models.CharField(max_length=255)
 
     def __unicode__(self):
         return '%s: %s' % (self.user, self.hyves_id)
@@ -52,9 +58,7 @@ class FriendFeedProfile(models.Model):
     user = models.ForeignKey(User)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
 
-class OpenIDProfile(models.Model):
-    user = models.ForeignKey(User)
-    site = models.ForeignKey(Site, default=Site.objects.get_current)
+class OpenIDProfile(SocialProfile):
     identity = models.TextField()
     
     def authenticate(self):
