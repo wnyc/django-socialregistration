@@ -23,7 +23,7 @@ def social_avatar(parser, token):
 
 class GetAvatar(template.Node):
     def __init__(self, user_id, width=50, height=50):
-        self.user_id = user_id
+        self.user_id = template.Variable(user_id)
         self.width = 50
         self.height = 50
 
@@ -52,10 +52,10 @@ class GetAvatar(template.Node):
                  'width': self.width,
                  'height': self.height}
 
-    def get_avatar(self):
+    def get_avatar(self, user_id):
         """ Returns the avatar for the social application """
         try:
-            profile = SocialProfile.objects.get(user__pk=self.user_id)
+            profile = SocialProfile.objects.get(user__pk=user_id)
         except SocialProfile.DoesNotExist:
             return ''
         else:
@@ -65,4 +65,9 @@ class GetAvatar(template.Node):
             else: return ''
 
     def render(self, context):
-        return mark_safe(self.get_avatar())
+        try:
+            user_id = self.user_id.resolve(context)
+            return mark_safe(self.get_avatar(user_id))
+        except template.VariableDoesNotExist:
+            return ''
+
