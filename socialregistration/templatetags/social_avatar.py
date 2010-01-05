@@ -5,7 +5,7 @@ from django.utils import simplejson
 from django.utils.translation import ugettext as _
 from django.conf import settings
 
-from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile
+from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile, SocialProfile
 
 import urllib2
 from time import time
@@ -53,23 +53,16 @@ class GetAvatar(template.Node):
                  'height': self.height}
 
     def get_avatar(self):
+        """ Returns the avatar for the social application """
         try:
-            facebook = FacebookProfile.objects.get(user=self.user_id)
-        except FacebookProfile.DoesNotExist:
-            pass
-        else: return self.get_facebook(facebook)
-
-        try:
-            twitter = TwitterProfile.objects.get(user=self.user_id)
-        except TwitterProfile.DoesNotExist:
-            pass
-        else: return self.get_twitter(twitter)
-
-        try:
-            hyves = HyvesProfile.objects.get(user=self.user_id)
-        except HyvesProfile.DoesNotExist:
-            return None
-        else: return self.get_hyves(hyves)
+            profile = SocialProfile.objects.get(user__pk=self.user_id)
+        except SocialProfile.DoesNotExist:
+            return ''
+        else:
+            if profile.type.name == 'facebook profile': return self.get_facebook(profile.get_instance())
+            elif profile.type.name == 'twitter profile': return self.get_twitter(profile.get_instance())
+            elif profile.type.name == 'hyves profile': return self.get_hyves(profile.get_instance())
+            else: return ''
 
     def render(self, context):
         return mark_safe(self.get_avatar())
