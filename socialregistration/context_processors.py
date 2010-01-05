@@ -23,8 +23,8 @@ def auth(request):
                 profile = HyvesProfile.objects.get(user=request.user)
             except HyvesProfile.DoesNotExist:
                 logout(request)
-        
+
     return {
         'request': request,
         'profile': profile,
-        }
+    }
