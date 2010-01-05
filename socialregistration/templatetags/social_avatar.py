@@ -34,7 +34,7 @@ class GetAvatar(template.Node):
              'timestamp': str(time()).split('.')[0],
              'username': hyves.username}
         url = '%(hyves_token_url)s?ha_fancylayout=False&ha_format=json&ha_method=users.getByUsername&ha_responsfields=profilepicture&ha_version=2.0&oauth_consumer_key=%(oauth_key)s&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=%(timestamp)s&oauth_token=&oauth_version=1.0&username=%(username)s&oauth_signature=' % d
-        return url
+        return ''
 
     def get_twitter(self, twitter):
         """ Returns the image for Twitter """
