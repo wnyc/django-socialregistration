@@ -121,6 +121,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
         return HttpResponseRedirect(reverse('socialregistration_setup'))
 
     login(request, user)
+    request.user.message_set.create(message=_('You have succesfully been logged in with your facebook account'))
     
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
@@ -172,6 +173,7 @@ def twitter(request):
         return HttpResponseRedirect(reverse('socialregistration_setup'))
     
     login(request, user)
+    request.user.message_set.create(message=_('You have succesfully been logged in with your twitter account'))
     
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
@@ -201,6 +203,7 @@ def hyves(request):
         return HttpResponseRedirect(reverse('socialregistration_setup'))
 
     login(request, user)
+    request.user.message_set.create(message=_('You have succesfully been logged in with your hyves account'))
     
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
