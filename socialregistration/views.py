@@ -19,9 +19,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.sites.models import Site
 
 from socialregistration.forms import UserForm
-from socialregistration.utils import (OAuthClient, OAuthTwitter, OAuthHyves, OAuthFriendFeed,
+from socialregistration.utils import (OAuthClient, OAuthTwitter, OAuthHyves, OAuthLinkedin, OAuthFriendFeed,
     OpenID)
-from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile, OpenIDProfile
+from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile, LinkedinProfile, OpenIDProfile
 
 
 FB_ERROR = _('We couldn\'t validate your Facebook credentials')
@@ -179,7 +179,7 @@ def twitter(request):
 
 def hyves(request):
     """
-    Actually setup/login an account relating to a twitter user after the oauth 
+    Actually setup/login an account relating to a hyves user after the oauth 
     process is finished successfully
     """
     client = OAuthHyves(
@@ -207,6 +207,35 @@ def hyves(request):
     
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
+def linkedin(request):
+    """
+    Actually setup/login an account relating to a linkedin user after the oauth 
+    process is finished successfully
+    """
+    client = OAuthLinkedin(
+        request, settings.LINKEDIN_CONSUMER_KEY,
+        settings.LINKEDIN_CONSUMER_SECRET_KEY,
+        settings.LINKEDIN_REQUEST_TOKEN_URL,
+    )
+    
+    user_info = client.get_user_info()
+
+    user = authenticate(linkedin_id=user_info['id'])
+
+    if user is None:
+        profile = LinkedinProfile(linkedin_id=user_info['id'],
+                               username=user_info['screen_name'],
+                               )
+        user = User()
+        request.session['socialregistration_profile'] = profile
+        request.session['socialregistration_user'] = user
+        request.session['next'] = _get_next(request)
+        return HttpResponseRedirect(reverse('socialregistration_setup'))
+
+    login(request, user)
+    request.user.message_set.create(message=_('You have succesfully been logged in with your linkedin account'))
+    
+    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
 def friendfeed(request):
     """
@@ -229,13 +258,17 @@ def oauth_redirect(request, consumer_key=None, secret_key=None,
 def oauth_callback(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
     callback_url=None, template='socialregistration/oauthcallback.html',
-    extra_context=dict(), parameters=None):
+    extra_context=dict(), verifier=None, parameters=None):
     """
     View to handle final steps of OAuth based authentication where the user 
     gets redirected back to from the service provider
     """
+    # Check for parameters in the request.GET.verifier
+    if 'oauth_verifier' in request.GET:
+        verifier = request.GET.get('oauth_verifier')
+
     client = OAuthClient(request, consumer_key, secret_key, request_token_url,
-        access_token_url, authorization_url, callback_url, parameters)
+        access_token_url, authorization_url, callback_url, verifier, parameters)
 
     extra_context.update(dict(oauth_client=client))
 

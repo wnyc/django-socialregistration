@@ -86,6 +86,34 @@ if getattr(settings, 'HYVES_CONSUMER_KEY', None) is not None:
         ),
         url('^hyves/$', 'socialregistration.views.hyves', name='hyves'),
     )
+
+#Setup Linkedin URLs if there's an API key specified
+if getattr(settings, 'LINKEDIN_CONSUMER_KEY', None) is not None:
+    urlpatterns = urlpatterns + patterns('',
+        url('^linkedin/redirect/$', 'socialregistration.views.oauth_redirect',
+            dict(
+                consumer_key=settings.LINKEDIN_CONSUMER_KEY,
+                secret_key=settings.LINKEDIN_CONSUMER_SECRET_KEY,
+                request_token_url=settings.LINKEDIN_REQUEST_TOKEN_URL,
+                access_token_url=settings.LINKEDIN_ACCESS_TOKEN_URL,
+                authorization_url=settings.LINKEDIN_AUTHORIZATION_URL,
+            ),
+            name='linkedin_redirect'),
+        
+        url('^linkedin/callback/$', 'socialregistration.views.oauth_callback',
+            dict(
+                consumer_key=settings.LINKEDIN_CONSUMER_KEY,
+                secret_key=settings.LINKEDIN_CONSUMER_SECRET_KEY,
+                request_token_url=settings.LINKEDIN_REQUEST_TOKEN_URL,
+                access_token_url=settings.LINKEDIN_ACCESS_TOKEN_URL,
+                authorization_url=settings.LINKEDIN_AUTHORIZATION_URL,
+                callback_url='linkedin',
+                parameters={'oauth_verifier':''}
+            ),
+            name='linkedin_callback'
+        ),
+        url('^linkedin/$', 'socialregistration.views.linkedin', name='linkedin'),
+    )
     
 # Setup FriendFeed URLs if there's an API key specified
 if getattr(settings, 'FRIENDFEED_CONSUMER_KEY', None) is not None:

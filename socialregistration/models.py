@@ -54,6 +54,15 @@ class HyvesProfile(SocialProfile):
     def authenticate(self):
         return authenticate(hyves_id=self.hyves_id)
 
+class LinkedinProfile(SocialProfile):
+    linkedin_id = models.CharField(max_length=255, blank=False, null=False)
+
+    def __unicode__(self):
+        return '%s: %s' % (self.user, self.linkedin_id)
+
+    def authenticate(self):
+        return authenticate(linkedin_id=self.linkedin_id)
+
 class FriendFeedProfile(models.Model):
     user = models.ForeignKey(User)
     site = models.ForeignKey(Site, default=Site.objects.get_current)

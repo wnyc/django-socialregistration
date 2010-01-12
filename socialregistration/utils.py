@@ -10,6 +10,8 @@ import time
 import base64
 import urllib
 import urllib2
+import httplib
+import re
 from xml.dom import minidom
 
 from oauth import oauth
@@ -125,7 +127,7 @@ class OAuthClient(oauth.OAuthClient):
     """
     
     def __init__(self, request, consumer_key, consumer_secret,
-        request_token_url, access_token_url, authorization_url, callback_url, parameters=None):
+        request_token_url, access_token_url, authorization_url, callback_url, verifier=None, parameters=None):
     
         self.request = request
     
@@ -136,6 +138,7 @@ class OAuthClient(oauth.OAuthClient):
         self.consumer = oauth.OAuthConsumer(consumer_key, consumer_secret)
         self.signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
 
+        self.verifier = verifier
         self.parameters = parameters
         
         self.errors = []
@@ -173,7 +176,7 @@ class OAuthClient(oauth.OAuthClient):
         Get an access token
         """
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(
-            self.consumer, http_url=self.access_token_url, token=self.token,
+            self.consumer, verifier=self.verifier, http_url=self.access_token_url, token=self.token,
             parameters=self.parameters
         )
         oauth_request.sign_request(self.signature_method, self.consumer, self.token)
@@ -221,6 +224,7 @@ class OAuthClient(oauth.OAuthClient):
             http_url=self.authorization_url,
             token=self.token,
         )
+
         if self.callback_url:
             oauth_request.parameters['oauth_callback'] = Site.objects.get_current().domain + reverse(self.callback_url)
 
@@ -287,6 +291,7 @@ class OAuth(object):
             self.consumer, http_url=url, token=self.access_token,
             parameters=parameters
         )
+
         oauth_request.sign_request(
             self.signature_method, self.consumer, self.access_token
         )
@@ -298,12 +303,23 @@ class OAuth(object):
         try:
             return urllib2.urlopen(oauth_request.to_url()).read()
         except urllib2.HTTPError, e:
-            raise Exception('%s on %s' % (e, oauth_request.to_url()))
+            raise Exception('%s on %s' % (e, oauth_request.to_header()))
 
     def query(self, url, parameters=None):
         return self.get_response(
             self.get_request(url, parameters)
         )
+
+    def header_based(self, url):
+        """ Make a header based http request """
+        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=self.access_token, http_url=url)
+        oauth_request.sign_request(self.signature_method, self.consumer, self.access_token)
+ 
+        headers = oauth_request.to_header()
+        connection = httplib.HTTPConnection("api.linkedin.com") # or HTTPSConnection, depending on what you're trying to do
+        connection.request(oauth_request.http_method, url, headers=headers)
+        data = connection.getresponse().read()
+        return data
         
 class OAuthTwitter(OAuth):
     """
@@ -341,5 +357,31 @@ class OAuthHyves(OAuth):
         user['screen_name'] = xml.getElementsByTagName('displayname')[0].childNodes[0].nodeValue
         user['avatar'] = xml.getElementsByTagName('icon_small')[0].getElementsByTagName('src')[0].childNodes[0].nodeValue
 
+        return user
+
+class OAuthLinkedin(OAuth):
+    """
+    Verifying linkedin credentials
+    """
+    url = 'http://api.linkedin.com/v1/people/~'
+    
+    def get_user_info(self):
+        user = dict()
+        user_xml = self.header_based(self.url)
+
+        xml = minidom.parseString(user_xml)
+        
+        user_url = xml.getElementsByTagName('url')[0].childNodes[0].nodeValue
+
+        reg = r'.*key=(?P<key>[\d]+)&.*'
+        match = re.match(reg, user_url)
+        
+        user['id'] = '%(key)s' % {'key': match.group('key') }
+        first_name = xml.getElementsByTagName('first-name')[0].childNodes[0].nodeValue
+        last_name = xml.getElementsByTagName('last-name')[0].childNodes[0].nodeValue
+
+        user['screen_name'] = '%(first_name)s %(last_name)s' % {'first_name': first_name,
+                                                                'last_name': last_name }
+        
         return user
 
