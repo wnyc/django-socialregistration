@@ -23,7 +23,7 @@ class SocialProfile(models.Model):
 
     def save(self, force_insert=False, force_update=False):
         """ Custom save method so the child of the published item can be found """
-        if not hasattr(self,'type_id'):
+        if self.type_id == None:
             self.type = ContentType.objects.get_for_model(self.__class__)
         super(SocialProfile, self).save(force_insert, force_update)
 
