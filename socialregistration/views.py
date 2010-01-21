@@ -119,8 +119,9 @@ def facebook_login(request, template='socialregistration/facebook.html',
         request.session['next'] = _get_next(request)
 
         return HttpResponseRedirect(reverse('socialregistration_setup'))
-
+    
     login(request, user)
+    request.session['fb_key'] = request.facebook.session_key
     request.user.message_set.create(message=_('You have succesfully been logged in with your facebook account'))
     
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
