@@ -140,7 +140,7 @@ class OAuthClient(oauth.OAuthClient):
 
         self.verifier = verifier
         self.parameters = parameters
-        
+
         self.errors = []
         
         self.callback_url = callback_url

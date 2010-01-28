@@ -122,7 +122,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
 
     login(request, user)
     request.user.message_set.create(message=_('You have succesfully been logged in with your facebook account'))
-    
+
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
 def facebook_connect(request, template='socialregistration/facebook.html',
@@ -144,7 +144,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     profile, created = FacebookProfile.objects.get_or_create(
         user=request.user, uid=request.facebook.uid
     )
-    
+
     return HttpResponseRedirect(_get_next(request))
 
 def twitter(request):
@@ -252,7 +252,7 @@ def oauth_redirect(request, consumer_key=None, secret_key=None,
     """
     request.session['next'] = _get_next(request)
     client = OAuthClient(request, consumer_key, secret_key,
-        request_token_url, access_token_url, authorization_url, callback_url, parameters)
+        request_token_url, access_token_url, authorization_url, callback_url, parameters=parameters)
     return client.get_redirect()
 
 def oauth_callback(request, consumer_key=None, secret_key=None,

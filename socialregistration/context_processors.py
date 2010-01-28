@@ -1,6 +1,7 @@
 import urllib2
 from django.conf import settings
 from django.contrib.auth import logout
+from django.template import RequestContext  
 
 from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile
 from socialregistration.utils import (OAuthTwitter, OAuthHyves)
