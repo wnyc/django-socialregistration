@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-02-01 15:59+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2010-02-01 16:05+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr ""
 
 #: forms.py:27
 msgid "This username is already in use."
-msgstr ""
+msgstr "Deze gebruikersnaam is al in gebruik"
 
 #: middleware.py:11
 msgid ""
@@ -28,7 +28,7 @@ msgstr ""
 
 #: utils.py:248
 msgid "No un-authorized token given."
-msgstr ""
+msgstr "Geen un-authorized token"
 
 #: utils.py:254
 msgid "The given authorization tokens do not match."
@@ -36,25 +36,25 @@ msgstr ""
 
 #: views.py:27
 msgid "We couldn't validate your Facebook credentials"
-msgstr ""
+msgstr "Geen facebook informatie gevonden bij deze gebruiker"
 
 #: views.py:124
 msgid "You have succesfully been logged in with your facebook account"
-msgstr ""
+msgstr "Je bent succesvol ingelogd met je facebook account"
 
 #: views.py:176
 msgid "You have succesfully been logged in with your twitter account"
-msgstr ""
+msgstr "Je bent succesvol ingelogd met je twitter account"
 
 #: views.py:206
 msgid "You have succesfully been logged in with your hyves account"
-msgstr ""
+msgstr "Je bent succesvol ingelogd met je hyves account"
 
 #: views.py:236
 msgid "You have succesfully been logged in with your linkedin account"
-msgstr ""
+msgstr "Je bent succesvol ingelogd met je linkedin account"
 
 #: templatetags/social_avatar.py:45 templatetags/social_profile.py:70
 #, python-format
 msgid "Visit %s's Twitter profile"
-msgstr ""
+msgstr "Bezoek %s's Twitter profiel"
