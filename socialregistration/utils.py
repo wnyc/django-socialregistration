@@ -355,6 +355,7 @@ class OAuthHyves(OAuth):
         xml = minidom.parseString(user_xml)
         user['id'] = xml.getElementsByTagName('userid')[0].childNodes[0].nodeValue
         user['screen_name'] = xml.getElementsByTagName('displayname')[0].childNodes[0].nodeValue
+        user['url'] = xml.getElementsByTagName('url')[0].childNodes[0].nodeValue
         user['avatar'] = xml.getElementsByTagName('icon_small')[0].getElementsByTagName('src')[0].childNodes[0].nodeValue
 
         return user

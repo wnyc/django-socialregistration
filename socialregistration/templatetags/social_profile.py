@@ -54,12 +54,17 @@ class GetAvatar(template.Node):
 
     def get_hyves(self, hyves):
         """ Returns the image for Hyves """
-        d = {'hyves_token_url': settings.HYVES_REQUEST_TOKEN_URL,
-             'oauth_key': settings.HYVES_CONSUMER_KEY,
-             'timestamp': str(time()).split('.')[0],
-             'username': hyves.username}
-        url = '%(hyves_token_url)s?ha_fancylayout=False&ha_format=json&ha_method=users.getByUsername&ha_responsfields=profilepicture&ha_version=2.0&oauth_consumer_key=%(oauth_key)s&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=%(timestamp)s&oauth_token=&oauth_version=1.0&username=%(username)s&oauth_signature=' % d
-        return ''
+        try:
+            profile = HyvesProfile.objects.get(pk=hyves.pk)
+        except:
+            avatar = '%(media_url)simg/default-avatar.png' % {'media_url': settings.MEDIA_URL }
+        else:
+            avatar = profile.avatar
+
+        return '<a href="%(profile)s" title="%(title)s"><img src="%(avatar)s" alt="%(username)s" /></a>' % {'avatar': avatar,
+                                                                                                            'username': profile.username,
+                                                                                                            'profile': profile.url,
+                                                                                                            'title': _('Visit %s\'s Hyves profile' % profile.username)}
 
     def get_twitter(self, twitter):
         """ Returns the image for Twitter """

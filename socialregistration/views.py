@@ -195,12 +195,22 @@ def hyves(request):
     if user is None:
         profile = HyvesProfile(hyves_id=user_info['id'],
                                username=user_info['screen_name'],
+                               avatar=user_info['avatar'],
+                               url=user_info['url'],
                                )
         user = User()
         request.session['socialregistration_profile'] = profile
         request.session['socialregistration_user'] = user
         request.session['next'] = _get_next(request)
         return HttpResponseRedirect(reverse('socialregistration_setup'))
+    else:
+        try:
+            profile = HyvesProfile.objects.get(user=user)
+        except HyvesProfile.DoesNotExist:
+            pass
+        else:
+            profile.avatar = user_info['avatar']
+            profile.save()
 
     login(request, user)
     request.user.message_set.create(message=_('You have succesfully been logged in with your hyves account'))
