@@ -91,7 +91,7 @@ def setup(request, template='socialregistration/setup.html',
         # Clear & Redirect
         del request.session['socialregistration_user']
         del request.session['socialregistration_profile']
-        return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+        return HttpResponseRedirect(_get_next(request))
         
 
 def facebook_login(request, template='socialregistration/facebook.html',
