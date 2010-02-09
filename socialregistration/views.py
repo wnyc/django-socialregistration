@@ -123,7 +123,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
     login(request, user)
     request.user.message_set.create(message=_('You have succesfully been logged in with your facebook account'))
 
-    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+    return HttpResponseRedirect(_get_next(request))
 
 def facebook_connect(request, template='socialregistration/facebook.html',
     extra_context=dict()):
@@ -174,8 +174,8 @@ def twitter(request):
     
     login(request, user)
     request.user.message_set.create(message=_('You have succesfully been logged in with your twitter account'))
-    
-    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+
+    return HttpResponseRedirect(_get_next(request))
 
 def hyves(request):
     """
@@ -215,7 +215,7 @@ def hyves(request):
     login(request, user)
     request.user.message_set.create(message=_('You have succesfully been logged in with your hyves account'))
     
-    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+    return HttpResponseRedirect(_get_next(request))
 
 def linkedin(request):
     """
@@ -245,7 +245,7 @@ def linkedin(request):
     login(request, user)
     request.user.message_set.create(message=_('You have succesfully been logged in with your linkedin account'))
     
-    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+    return HttpResponseRedirect(_get_next(request))
 
 def friendfeed(request):
     """
