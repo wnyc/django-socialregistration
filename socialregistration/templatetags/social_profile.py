@@ -54,17 +54,14 @@ class GetAvatar(template.Node):
 
     def get_hyves(self, hyves):
         """ Returns the image for Hyves """
-        try:
-            profile = HyvesProfile.objects.get(pk=hyves.pk)
-        except:
+        avatar = hyves.avatar
+        if not avatar:
             avatar = '%(media_url)simg/default-avatar.png' % {'media_url': settings.MEDIA_URL }
-        else:
-            avatar = profile.avatar
 
         return '<a href="%(profile)s" title="%(title)s"><img src="%(avatar)s" alt="%(username)s" /></a>' % {'avatar': avatar,
-                                                                                                            'username': profile.username,
-                                                                                                            'profile': profile.url,
-                                                                                                            'title': _('Visit %s\'s Hyves profile' % profile.username)}
+                                                                                                            'username': hyves.username,
+                                                                                                            'profile': hyves.url,
+                                                                                                            'title': _('Visit %s\'s Hyves profile' % hyves.username)}
 
     def get_twitter(self, twitter):
         """ Returns the image for Twitter """
