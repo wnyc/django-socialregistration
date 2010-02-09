@@ -8,7 +8,7 @@ from socialregistration.utils import (OAuthTwitter, OAuthHyves)
 
 def auth(request):
     profile = None
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() and request.session['_auth_user_backend'] != 'django.contrib.auth.backends.ModelBackend':
         try:
             profile = SocialProfile.objects.get(user=request.user)
         except SocialProfile.DoesNotExist:
