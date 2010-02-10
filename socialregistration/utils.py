@@ -226,7 +226,8 @@ class OAuthClient(oauth.OAuthClient):
         )
 
         if self.callback_url:
-            oauth_request.parameters['oauth_callback'] = Site.objects.get_current().domain + reverse(self.callback_url)
+            oauth_request.parameters['oauth_callback'] = 'http://%(domain)s%(path)s' % {'domain': Site.objects.get_current().domain,
+                                                                                        'path': reverse(self.callback_url) }
 
         oauth_request.sign_request(self.signature_method, self.consumer, self.token)
         return oauth_request.to_url()
