@@ -63,8 +63,11 @@ def setup(request, template='socialregistration/setup.html',
                 form.save()
                 user = form.profile.authenticate()
                 login(request, user)
-                del request.session['socialregistration_user']
-                del request.session['socialregistration_profile']
+                if request.session.has_key('socialregistration_user'):
+                    del request.session['socialregistration_user']
+                if request.session.has_key('socialregistration_profile'):
+                    del request.session['socialregistration_profile']
+
                 return HttpResponseRedirect(_get_next(request))
     
         extra_context.update(dict(form=form))
@@ -107,7 +110,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
             template, extra_context, context_instance=RequestContext(request)
         )
     
-    user = authenticate(uid=request.facebook.uid)
+    user = authenticate(uid=str(request.facebook.uid))
     
     if user is None:
         request.session['socialregistration_user'] = User()
