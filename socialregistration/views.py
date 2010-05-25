@@ -85,16 +85,14 @@ def setup(request, template='socialregistration/setup.html',
         )
     else:
         # Generate user and profile
-        user = request.session['socialregistration_user']
-        user.username = str(uuid.uuid4())[:30]
-        user.save()
+        social_user.username = str(uuid.uuid4())[:30]
+        social_user.save()
 
-        profile = request.session['socialregistration_profile']
-        profile.user = user
-        profile.save()
+        social_profile.user = social_user
+        social_profile.save()
 
         # Authenticate and login
-        user = profile.authenticate()
+        user = social_profile.authenticate()
         login(request, user)
 
         # Clear & Redirect
