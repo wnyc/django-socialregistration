@@ -11,7 +11,12 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from django.utils.translation import gettext as _
 from django.http import HttpResponseRedirect
-from django.views.decorators.csrf import csrf_protect
+
+try:
+    from django.views.decorators.csrf import csrf_protect
+    has_csrf = True
+except ImportError:
+    has_csrf = False
 
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout as auth_logout
@@ -43,25 +48,24 @@ def _get_next(request):
     else:
         return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
-@csrf_protect
 def setup(request, template='socialregistration/setup.html',
     form_class=UserForm, extra_context=dict()):
     """
     Setup view to create a username & set email address after authentication
     """
+    try:
+        social_user = request.session['socialregistration_user']
+        social_profile = request.session['socialregistration_profile']
+    except KeyError:
+        return render_to_response(
+            template, dict(error=True), context_instance=RequestContext(request))
+    
     if not GENERATE_USERNAME:
         # User can pick own username
         if not request.method == "POST":
-            form = form_class(
-                request.session['socialregistration_user'],
-                request.session['socialregistration_profile'],
-            )
+            form = form_class(social_user, social_profile)
         else:
-            form = form_class(
-                request.session['socialregistration_user'],
-                request.session['socialregistration_profile'],
-                request.POST
-            )
+            form = form_class(social_user, social_profile, request.POST)
             if form.is_valid():
                 form.save()
                 user = form.profile.authenticate()
@@ -97,6 +101,9 @@ def setup(request, template='socialregistration/setup.html',
         del request.session['socialregistration_user']
         del request.session['socialregistration_profile']
         return HttpResponseRedirect(_get_next(request))
+
+if has_csrf:
+    setup = csrf_protect(setup)
 
 def facebook_login(request, template='socialregistration/facebook.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
