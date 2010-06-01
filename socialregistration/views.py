@@ -108,21 +108,19 @@ def facebook_login(request, template='socialregistration/facebook.html',
     """
     View to handle the Facebook login
     """
-    if not request.facebook.check_session(request):
-        extra_context.update(
-            dict(error=FB_ERROR)
-        )
-        return render_to_response(
-            template, extra_context, context_instance=RequestContext(request)
-        )
+    if request.facebook.uid is None:
+        extra_context.update(dict(error=FB_ERROR))
+        return render_to_response(template, extra_context,
+            context_instance=RequestContext(request))
 
-    user = authenticate(uid=str(request.facebook.uid))
+    user = authenticate(uid=request.facebook.uid)
 
     if user is None:
         request.session['socialregistration_user'] = User()
-        fb_profile = request.facebook.users.getInfo([request.facebook.uid], ['name', 'pic_square'])[0]
+        fb_profile = request.facebook.graph.get_object("me")
         request.session['socialregistration_profile'] = FacebookProfile(
             uid=request.facebook.uid,
+            username=fb_profile['name'],
             )
         request.session['next'] = _get_next(request)
 
@@ -144,16 +142,10 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     """
     View to handle connecting existing accounts with facebook
     """
-    if not request.facebook.check_session(request) \
-        or not request.user.is_authenticated():
-        extra_context.update(
-            dict(error=FB_ERROR)
-        )
-        return render_to_response(
-            template,
-            extra_context,
-            context_instance=RequestContext(request)
-        )
+    if request.facebook.uid is None or request.user.is_authenticated() is False:
+        extra_context.update(dict(error=FB_ERROR))
+        return render_to_response(template, extra_context,
+            context_instance=RequestContext(request))
 
     try:
         profile = FacebookProfile.objects.get(uid=request.facebook.uid)
