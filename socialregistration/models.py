@@ -27,6 +27,9 @@ class SocialProfile(models.Model):
             self.type = ContentType.objects.get_for_model(self.__class__)
         super(SocialProfile, self).save(force_insert, force_update)
 
+    def __unicode__(self):
+        return self.username
+
 class FacebookProfile(SocialProfile):
     uid = models.CharField(max_length=255, blank=False, null=False)
     
