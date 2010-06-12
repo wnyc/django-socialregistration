@@ -21,11 +21,11 @@ class SocialProfile(models.Model):
         """ Returns the child instance """
         return self.type.get_object_for_this_type(id=self.id)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, force_insert=False, force_update=False, *args, **kwargs):
         """ Custom save method so the child of the published item can be found """
         if self.type_id == None:
             self.type = ContentType.objects.get_for_model(self.__class__)
-        super(SocialProfile, self).save(force_insert, force_update)
+        super(SocialProfile, self).save(force_insert, force_update, *args, **kwargs)
 
     def __unicode__(self):
         return self.username
