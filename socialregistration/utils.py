@@ -300,25 +300,6 @@ class OAuthTwitter(OAuth):
     def get_user_info(self):
         user = simplejson.loads(self.query(self.url))
         return user    
-        
-class OAuthHyves(OAuth):
-    """
-    Verifying hyves credentials
-    """
-    url = 'http://data.hyves-api.nl/'
-    parameters = {'ha_method': 'users.getLoggedin', 'ha_responsefields': 'profilepicture', 'ha_version': '1.2', 'ha_format': 'xml', 'ha_fancylayout': 'false' }
-    
-    def get_user_info(self):
-        user = dict()
-        user_xml = self.query(self.url, self.parameters)
-
-        xml = minidom.parseString(user_xml)
-        user['id'] = xml.getElementsByTagName('userid')[0].childNodes[0].nodeValue
-        user['screen_name'] = xml.getElementsByTagName('displayname')[0].childNodes[0].nodeValue
-        user['url'] = xml.getElementsByTagName('url')[0].childNodes[0].nodeValue
-        user['avatar'] = xml.getElementsByTagName('icon_small')[0].getElementsByTagName('src')[0].childNodes[0].nodeValue
-
-        return user
 
 class OAuthLinkedin(OAuth):
     """

@@ -243,7 +243,7 @@ def hyves(request):
         except HyvesProfile.DoesNotExist:
             pass
         else:
-            profile.avatar = user_info['avatar']
+            profile.avatar = ''
             profile.save()
 
     login(request, user)
