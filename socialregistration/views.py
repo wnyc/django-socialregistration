@@ -219,21 +219,18 @@ def hyves(request):
     Actually setup/login an account relating to a hyves user after the oauth 
     process is finished successfully
     """
-    client = OAuthHyves(
-        request, settings.HYVES_CONSUMER_KEY,
-        settings.HYVES_CONSUMER_SECRET_KEY,
-        settings.HYVES_REQUEST_TOKEN_URL,
-    )
-    
-    user_info = client.get_user_info()
+    user_info = {}
+    if request.method == 'POST':
+        user_info['id'] = request.POST.get('userid', '')
+        user_info['username'] = request.POST.get('username', '')
+        user_info['url'] = request.POST.get('url', '')
 
-    user = authenticate(hyves_id=user_info['id'])
+    user = authenticate(hyves_id=getattr(user_info, 'id', ''))
     
     if user is None:
-        profile = HyvesProfile(hyves_id=user_info['id'],
-                               username=user_info['screen_name'],
-                               avatar=user_info['avatar'],
-                               url=user_info['url'],
+        profile = HyvesProfile(hyves_id=getattr(user_info, 'id', ''),
+                               username=getattr(user_info, 'username', ''),
+                               url=getattr(user_info, 'url', ''),
                                )
         user = User()
         request.session['socialregistration_profile'] = profile

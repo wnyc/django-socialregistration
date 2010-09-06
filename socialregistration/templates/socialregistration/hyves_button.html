@@ -1,9 +1,13 @@
-{% load hyves_tags %}
-<script type="text/javascript" src="http://www.hyves.nl/precompiled/hyvesconnect.js"></script>
-
-<form class="connect-button" name="login" method="post" action="{% url hyves_redirect %}">
+<form class="connect-button" name="hyves_login" method="post" action="{% url hyves_connect %}">
 {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />
 {% endif %}
-<input type="submit" onclick="this.form.submit();" value="Hyves" />
+
+    <input type="hidden" name="userid" />
+    <input type="hidden" name="username" />
+    <input type="hidden" name="url" />
+
+    <div id="loginDiv">
+      <!-- This is the location where the connect with Hyves buttons is displayed when the auto login attempt fails -->     
+    </div>
 </form>

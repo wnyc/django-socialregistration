@@ -60,31 +60,11 @@ if getattr(settings, 'TWITTER_CONSUMER_KEY', None) is not None:
 #Setup Hyves URLs if there's an API key specified
 if getattr(settings, 'HYVES_CONSUMER_KEY', None) is not None:
     urlpatterns = urlpatterns + patterns('',
-        url('^hyves/redirect/$', 'socialregistration.views.oauth_redirect',
-            dict(
-                consumer_key=settings.HYVES_CONSUMER_KEY,
-                secret_key=settings.HYVES_CONSUMER_SECRET_KEY,
-                request_token_url=settings.HYVES_REQUEST_TOKEN_URL,
-                access_token_url=settings.HYVES_ACCESS_TOKEN_URL,
-                authorization_url=settings.HYVES_AUTHORIZATION_URL,
-                callback_url='hyves_callback',
-                parameters={'ha_method':'auth.requesttoken', 'ha_version': '1.2', 'ha_format': 'json', 'ha_fancylayout': 'false', 'methods': 'users.getLoggedin'}
-            ),
-            name='hyves_redirect'),
-        
-        url('^hyves/callback/$', 'socialregistration.views.oauth_callback',
-            dict(
-                consumer_key=settings.HYVES_CONSUMER_KEY,
-                secret_key=settings.HYVES_CONSUMER_SECRET_KEY,
-                request_token_url=settings.HYVES_REQUEST_TOKEN_URL,
-                access_token_url=settings.HYVES_ACCESS_TOKEN_URL,
-                authorization_url=settings.HYVES_AUTHORIZATION_URL,
-                callback_url='hyves',
-                parameters={'ha_method':'auth.accesstoken', 'ha_version': '1.2.1', 'ha_format': 'xml', 'ha_fancylayout': 'false'}
-            ),
-            name='hyves_callback'
-        ),
-        url('^hyves/$', 'socialregistration.views.hyves', name='hyves'),
+        url('^hyves/connect/$', 'socialregistration.views.hyves',
+            name='hyves_connect'),
+        url('^hcrpc_relay.html$', 'django.views.generic.simple.direct_to_template',
+            {'template':'socialregistration/hcrpc_relay.html'},
+            name='hyves_hcrpc_relay'),                                         
     )
 
 #Setup Linkedin URLs if there's an API key specified

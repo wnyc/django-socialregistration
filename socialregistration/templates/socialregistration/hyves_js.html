@@ -1,0 +1,50 @@
+<script type="text/javascript" src="http://www.hyves.nl/precompiled/hyvesconnect.js"></script>
+<script type="text/javascript">
+      // Define the init 
+     Hyves.connect.init({
+          // This is the consumer key bound to this application. The consumer key is used for API integration
+          consumerKey: "{{ hyves_consumer_key }}",
+          // This file is used for cross domain communication within older browsers
+          rpcRelay: "{% url hyves_hcrpc_relay %}"
+     });
+ 
+     // Define the login option for the connect
+     var loginOptions = {
+          // Basic profile information: username, profile picture, profile page
+          profileInformation: true,  
+          // Contact information: Home adress, email adress, phone number 
+          contactInformation: false, 
+          // Define if you need API access or just want to use the login functionality
+          apiAccess: false, 
+          // Define which API methods you need. This is ignored if apiAccess is set to false
+          apiScope: "methods=users.get" 
+     };
+ 
+     // Define the options for the button which will be displayed when autoAttempt fails or is disabled 
+     var buttonOptions = {
+          // Define your own or leave empty if you want to use the default image
+          // image: "", 
+          // Set to true if you want to automatically attempt to login. Set to false to show the connect button instead
+          autoAttempt: true 
+     };
+ 
+     // Define where the login button should be displayed if the autoAttempt fails or is disabled
+     var divNode = document.getElementById('loginDiv'); 
+ 
+     // Execute the HyvesConnect Login script
+     Hyves.connect.login.button(loginOptions, buttonOptions, function(response){
+ 
+          // Retrieve and assign variables for username and profile url
+          var username = response.getField(Hyves.constants.response.profileField.nickname);
+          var profileUrl = response.getField(Hyves.constants.response.profileField.profileurl);    
+          var userid = response.getField(Hyves.constants.response.field.userid);    
+
+          document.getElementById("username").value = username;
+          document.getElementById("url").value = profileUrl;
+          document.getElementById("userid").value = userid;
+
+          document.hyves_login.submit();
+     }, divNode);
+ 
+     </script>
+
