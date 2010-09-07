@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 
 class UserForm(forms.Form):
     username = forms.RegexField(r'\w+', max_length=255,)
-    email = forms.EmailField(required=False)
+    email = forms.EmailField(required=True)
     
     def __init__(self, user, profile, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
@@ -25,6 +25,15 @@ class UserForm(forms.Form):
             return username
         else:
             raise forms.ValidationError(_('This username is already in use.'))
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return email
+        else:
+            raise forms.ValidationError(_('This e-mailaddress is already in use.'))
     
     def save(self):
         self.user.username = self.cleaned_data.get('username')
