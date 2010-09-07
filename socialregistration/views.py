@@ -25,7 +25,7 @@ from django.contrib.sites.models import Site
 from socialregistration.forms import UserForm
 from socialregistration.utils import (OAuthClient, OAuthTwitter, OAuthLinkedin,
     OpenID, _https)
-from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile, LinkedInProfile, OpenIDProfile
+from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile, LinkedinProfile, OpenIDProfile
 
 FB_ERROR = _('We couldn\'t validate your Facebook credentials')
 
