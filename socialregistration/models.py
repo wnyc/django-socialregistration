@@ -12,7 +12,7 @@ from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 
 class SocialProfile(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='social')
     site = models.ForeignKey(Site, default=Site.objects.get_current)
     username = models.CharField(max_length=255)
     type = models.ForeignKey(ContentType, editable=False)

@@ -152,7 +152,6 @@ def facebook_connect(request, template='socialregistration/facebook.html',
         profile = FacebookProfile.objects.create(user=request.user,
             uid=request.facebook.uid)
 
-
     return HttpResponseRedirect(_get_next(request))
 
 def logout(request, redirect_url=None):
@@ -187,8 +186,9 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
         try:
             profile = TwitterProfile.objects.get(twitter_id=user_info['id'])
         except TwitterProfile.DoesNotExist: # There can only be one profile!
-            profile = TwitterProfile.objects.create(twitter_id=user_info['id'])
-
+            profile = TwitterProfile.objects.create(user_id=request.user.pk,
+                                                    twitter_id=user_info['id'])
+        
         return HttpResponseRedirect(_get_next(request))
 
     user = authenticate(twitter_id=user_info['id'])
