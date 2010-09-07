@@ -1,4 +1,6 @@
+{% load socialregistration_tags %}
 <form class="connect-button" name="hyves_login" method="post" action="{% url hyves_connect %}">
+{% social_csrf_token %}
 {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />
 {% endif %}
