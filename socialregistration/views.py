@@ -37,14 +37,14 @@ def _get_next(request):
     """
     Returns a url to redirect to after the login
     """
-    if 'next' in request.session:
-        next = request.session['next']
-        del request.session['next']
-        return next
-    elif 'next' in request.GET:
+    if 'next' in request.GET:
         return request.GET.get('next')
     elif 'next' in request.POST:
         return request.POST.get('next')
+    elif 'next' in request.session:
+        next = request.session['next']
+        del request.session['next']
+        return next
     else:
         return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
