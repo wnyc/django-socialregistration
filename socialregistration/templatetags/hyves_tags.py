@@ -1,12 +1,15 @@
 from django import template
 from django.conf import settings
+from django.contrib.sites.models import Site
 from socialregistration.utils import _https
 
 register = template.Library()
 
 @register.inclusion_tag('socialregistration/hyves_js.html')
 def hyves_js():
-    return {'hyves_consumer_key' : settings.HYVES_CONSUMER_KEY, 'is_https' : bool(_https())}
+    return {'hyves_consumer_key' : settings.HYVES_CONSUMER_KEY,
+            'site': Site.objects.get_current(),
+            'is_https' : bool(_https())}
 
 @register.inclusion_tag('socialregistration/hyves_button.html', takes_context=True)
 def hyves_button(context):

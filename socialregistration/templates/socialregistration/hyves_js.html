@@ -5,7 +5,7 @@
           // This is the consumer key bound to this application. The consumer key is used for API integration
           consumerKey: "{{ hyves_consumer_key }}",
           // This file is used for cross domain communication within older browsers
-          rpcRelay: "http://localhost:8000{% url hyves_hcrpc_relay %}"
+          rpcRelay: "http://{{ site.domain }}{% url hyves_hcrpc_relay %}"
      });
  
      // Define the login option for the connect
