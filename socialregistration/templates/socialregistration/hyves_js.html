@@ -32,19 +32,20 @@
      var divNode = document.getElementById('loginDiv'); 
  
      // Execute the HyvesConnect Login script
-     Hyves.connect.login.button(loginOptions, buttonOptions, function(response){
+     if(divNode){
+      Hyves.connect.login.button(loginOptions, buttonOptions, function(response){
  
-          // Retrieve and assign variables for username and profile url
-          var username = response.getField(Hyves.constants.response.profileField.nickname);
-          var profileUrl = response.getField(Hyves.constants.response.profileField.profileurl);    
-          var userid = response.getField(Hyves.constants.response.field.userid);    
+      // Retrieve and assign variables for username and profile url
+      var username = response.getField(Hyves.constants.response.profileField.nickname);
+      var profileUrl = response.getField(Hyves.constants.response.profileField.profileurl);    
+      var userid = response.getField(Hyves.constants.response.field.userid);    
 
-          document.getElementById("username").value = username;
-          document.getElementById("url").value = profileUrl;
-          document.getElementById("userid").value = userid;
+      document.getElementById("username").value = username;
+      document.getElementById("url").value = profileUrl;
+      document.getElementById("userid").value = userid;
 
-          document.hyves_login.submit();
-     }, divNode);
- 
+      document.hyves_login.submit();
+      }, divNode);
+     }
      </script>
 
