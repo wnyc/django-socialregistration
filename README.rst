@@ -24,11 +24,10 @@ Configuration
 
 Facebook Graph API Connect
 ----------------
-#. The previous connect will be deprecated in further releases for now it's still available
-#. Add ``FACEBOOK_CLIENT_ID`` and ``FACEBOOK_SECRET_KEY`` to your settings file 
-representing the app id and the secret key you were given by Facebook.
-#. Add ``socialregistration.auth.FacebookAuth`` to ``AUTHENTICATION_BACKENDS`` in your settings file.
-#. Add ``socialregistration.middleware.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES`` in your settings file.
+#.  The previous connect will be deprecated in further releases for now it's still available.
+#.  Add ``FACEBOOK_CLIENT_ID`` and ``FACEBOOK_SECRET_KEY`` to your settings file representing the app id and the secret key you were given by Facebook.
+#.  Add ``socialregistration.auth.FacebookAuth`` to ``AUTHENTICATION_BACKENDS`` in your settings file.
+#.  Add ``socialregistration.middleware.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES`` in your settings file.
 #.  Add tags to your template file::
 
 	{% load facebook_tags %} 
