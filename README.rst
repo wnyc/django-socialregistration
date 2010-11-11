@@ -22,18 +22,17 @@ Installation
 Configuration
 =============
 
-Facebook Connect
+Facebook Graph API Connect
 ----------------
-#. Add ``FACEBOOK_API_KEY`` and ``FACEBOOK_SECRET_KEY`` to your settings file representing the keys you were given by Facebook.
+#. The previous connect will be deprecated in further releases for now it's still available
+#. Add ``FACEBOOK_CLIENT_ID`` and ``FACEBOOK_SECRET_KEY`` to your settings file 
+representing the app id and the secret key you were given by Facebook.
 #. Add ``socialregistration.auth.FacebookAuth`` to ``AUTHENTICATION_BACKENDS`` in your settings file.
-#. Add 'facebook.djangofb.FacebookMiddleware' to ``MIDDLEWARE_CLASSES`` in your settings file. See: http://wiki.developers.facebook.com/index.php/User:PyFacebook_Tutorial#Add_the_middleware
+#. Add ``socialregistration.middleware.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES`` in your settings file.
 #.  Add tags to your template file::
 
-    {% load facebook_tags %}
-    {% facebook_button %}
-    {% facebook_js %}
-
-#. If you wish on using the pyfacebook library to do API calls instead of the JavaScript lib, add ``socialregistration.middleware.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES``
+	{% load facebook_tags %} 
+ 	{% facebook_button %}
 
 Twitter
 -------
