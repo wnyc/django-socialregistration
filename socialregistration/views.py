@@ -3,7 +3,7 @@ Created on 22.09.2009
 
 @author: alen
 """
-import uuid
+import uuid, urllib, cgi
 
 from django.conf import settings
 from django.template import RequestContext
@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from django.utils.translation import gettext as _
 from django.http import HttpResponseRedirect
+from django.utils import simplejson
 
 try:
     from django.views.decorators.csrf import csrf_protect
@@ -102,6 +103,7 @@ def setup(request, template='socialregistration/setup.html',
 if has_csrf:
     setup = csrf_protect(setup)
 
+# Will be deprecated in further releases
 def facebook_login(request, template='socialregistration/facebook.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
     """
@@ -136,6 +138,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
 
     return HttpResponseRedirect(_get_next(request))
 
+# Will be deprecated in further releases
 def facebook_connect(request, template='socialregistration/facebook.html',
     extra_context=dict()):
     """
@@ -153,6 +156,67 @@ def facebook_connect(request, template='socialregistration/facebook.html',
             uid=request.facebook.uid)
 
     return HttpResponseRedirect(_get_next(request))
+
+def facebook_graph_connect(request, template='socialregistration/facebook.html',
+                           extra_context=dict()):
+    """
+    View to handle graph connecting
+
+    Authorize and create user if none
+
+    """
+    code = request.GET.get('code', None)
+    # Create dictionary for facebook request
+    args = dict(client_id=settings.FACEBOOK_CLIENT_ID,
+                redirect_uri='http://%(domain)s%(uri)s' % {'domain': Site.objects.get_current().domain,
+                                                           'uri': reverse('facebook_graph_connect') },
+                display=getattr(settings, 'FACEBOOK_DISPLAY', 'popup'))
+
+    # Code is present get access_token
+    if code is not None:
+        args = dict(client_id=settings.FACEBOOK_CLIENT_ID,
+                    redirect_uri='http://%(domain)s%(uri)s' % {'domain': Site.objects.get_current().domain,
+                                                               'uri': reverse('facebook_graph_connect') },
+                    display=getattr(settings, 'FACEBOOK_DISPLAY', 'popup'))                    
+        args['client_secret'] = settings.FACEBOOK_SECRET_KEY
+        args['code'] = code
+
+        # Try for access token
+        try:
+            response = cgi.parse_qs(urllib.urlopen("https://graph.facebook.com/oauth/access_token?" +
+                                                   urllib.urlencode(args)).read())
+        except:
+            return render_to_response(template, extra_context,
+                                      context_instance=RequestContext(request))
+
+        access_token = response["access_token"][-1]
+        try:
+            me_json = urllib.urlopen("https://graph.facebook.com/me?" + urllib.urlencode(dict(access_token=access_token)))
+        except:
+            return render_to_response(template, extra_context,
+                                      context_instance=RequestContext(request))
+            
+        profile = simplejson.load(me_json)
+                    
+        user = authenticate(uid=profile['id'])
+
+        # User not found create new one
+        if user is None:
+            request.session['socialregistration_user'] = User()
+            request.session['socialregistration_profile'] = FacebookProfile(
+                uid=profile['id'],
+                username=profile['name'],
+            )
+            request.session['next'] = _get_next(request)
+
+            return HttpResponseRedirect(reverse('socialregistration_setup'))
+
+        login(request, user)
+
+        return HttpResponseRedirect(_get_next(request))
+    # Code is not present authorize first
+    else:
+        return HttpResponseRedirect("https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args))
 
 def logout(request, redirect_url=None):
     """

@@ -19,7 +19,6 @@ class FacebookMiddleware(object):
         You might want to use this if you don't feel confortable with the 
         javascript library.
         """
-        
         fb_user = facebook.get_user_from_cookie(request.COOKIES,
             settings.FACEBOOK_API_KEY, settings.FACEBOOK_SECRET_KEY)
 
