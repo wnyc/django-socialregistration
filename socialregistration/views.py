@@ -159,14 +159,10 @@ def facebook_connect(request, template='socialregistration/facebook.html',
 
 def facebook_graph_login(request):
     """ Handle the login """
-    if request.REQUEST.get("device"):
-        device = request.REQUEST.get("device")
-    else:
-        device = "user-agent"
-    print device
     params = {}
     params['client_id'] = settings.FACEBOOK_APP_ID
     params['redirect_uri'] = request.build_absolute_uri(reverse('facebook_graph_connect'))
+    params['display'] = getattr(settings, 'FACEBOOK_DISPLAY', 'popup')
 
     url = 'https://graph.facebook.com/oauth/authorize?' + urllib.urlencode(params)
 

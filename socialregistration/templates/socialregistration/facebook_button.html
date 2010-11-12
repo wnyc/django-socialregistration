@@ -1,5 +1,5 @@
 
-<form class="connect-button" name="login" method="post" action="{% url facebook_graph_connect %}">
+<form class="connect-button" name="login" method="post" action="{% url facebook_graph_login %}">
 {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />
 {% endif %}
