@@ -3,7 +3,7 @@ Created on 22.09.2009
 
 @author: alen
 """
-import uuid, urllib, cgi
+import uuid, urllib, cgi, facebook
 
 from django.conf import settings
 from django.template import RequestContext
@@ -59,7 +59,7 @@ def setup(request, template='socialregistration/setup.html',
     except KeyError:
         return render_to_response(
             template, dict(error=True), context_instance=RequestContext(request))
-    
+
     if not GENERATE_USERNAME:
         # User can pick own username
         if not request.method == "POST":
@@ -157,6 +157,21 @@ def facebook_connect(request, template='socialregistration/facebook.html',
 
     return HttpResponseRedirect(_get_next(request))
 
+def facebook_graph_login(request):
+    """ Handle the login """
+    if request.REQUEST.get("device"):
+        device = request.REQUEST.get("device")
+    else:
+        device = "user-agent"
+    print device
+    params = {}
+    params['client_id'] = settings.FACEBOOK_APP_ID
+    params['redirect_uri'] = request.build_absolute_uri(reverse('facebook_graph_connect'))
+
+    url = 'https://graph.facebook.com/oauth/authorize?' + urllib.urlencode(params)
+
+    return HttpResponseRedirect(url)
+
 def facebook_graph_connect(request, template='socialregistration/facebook.html',
                            extra_context=dict()):
     """
@@ -165,58 +180,51 @@ def facebook_graph_connect(request, template='socialregistration/facebook.html',
     Authorize and create user if none
 
     """
-    code = request.GET.get('code', None)
-    # Create dictionary for facebook request
-    args = dict(client_id=settings.FACEBOOK_CLIENT_ID,
-                redirect_uri='http://%(domain)s%(uri)s' % {'domain': Site.objects.get_current().domain,
-                                                           'uri': reverse('facebook_graph_connect') },
-                display=getattr(settings, 'FACEBOOK_DISPLAY', 'popup'))
+    cookie = facebook.get_user_from_cookie(request.COOKIES, settings.FACEBOOK_API_KEY, settings.FACEBOOK_SECRET_KEY)
+    if cookie:
+        uid = cookie['uid']
+        access_token = cookie['access_token']
+    else:
+        # if cookie does not exist
+        # assume logging in normal way
+        params = {}
+        params["client_id"] = settings.FACEBOOK_APP_ID
+        params["client_secret"] = settings.FACEBOOK_SECRET_KEY
+        params["redirect_uri"] = request.build_absolute_uri(reverse("facebook_graph_connect"))
+        params["code"] = request.GET.get('code', '')
 
-    # Code is present get access_token
-    if code is not None:
-        args = dict(client_id=settings.FACEBOOK_CLIENT_ID,
-                    redirect_uri='http://%(domain)s%(uri)s' % {'domain': Site.objects.get_current().domain,
-                                                               'uri': reverse('facebook_graph_connect') },
-                    display=getattr(settings, 'FACEBOOK_DISPLAY', 'popup'))                    
-        args['client_secret'] = settings.FACEBOOK_SECRET_KEY
-        args['code'] = code
-
-        # Try for access token
-        try:
-            response = cgi.parse_qs(urllib.urlopen("https://graph.facebook.com/oauth/access_token?" +
-                                                   urllib.urlencode(args)).read())
-        except:
+        url = "https://graph.facebook.com/oauth/access_token?"+urllib.urlencode(params)
+        from cgi import parse_qs
+        userdata = urllib.urlopen(url).read()
+        res_parse_qs = parse_qs(userdata)
+        # Could be a bot query
+        if not res_parse_qs.has_key('access_token'):
             return render_to_response(template, extra_context,
                                       context_instance=RequestContext(request))
 
-        access_token = response["access_token"][-1]
-        try:
-            me_json = urllib.urlopen("https://graph.facebook.com/me?" + urllib.urlencode(dict(access_token=access_token)))
-        except:
-            return render_to_response(template, extra_context,
-                                      context_instance=RequestContext(request))
-            
-        profile = simplejson.load(me_json)
-                    
-        user = authenticate(uid=profile['id'])
+        access_token = res_parse_qs['access_token'][-1]
 
-        # User not found create new one
-        if user is None:
-            request.session['socialregistration_user'] = User()
-            request.session['socialregistration_profile'] = FacebookProfile(
-                uid=profile['id'],
+        graph = facebook.GraphAPI(access_token)
+        uid = graph.get_object('me')['id']
+
+    user = authenticate(uid=uid)
+
+    if not user:
+        graph = facebook.GraphAPI(access_token)
+        profile = graph.get_object("me")
+
+        request.session['socialregistration_user'] = User()
+        request.session['socialregistration_profile'] = FacebookProfile(
+                uid=uid,
                 username=profile['name'],
             )
-            request.session['next'] = _get_next(request)
+        request.session['next'] = _get_next(request)
 
-            return HttpResponseRedirect(reverse('socialregistration_setup'))
+        return HttpResponseRedirect(reverse('socialregistration_setup'))
 
-        login(request, user)
+    login(request, user)
 
-        return HttpResponseRedirect(_get_next(request))
-    # Code is not present authorize first
-    else:
-        return HttpResponseRedirect("https://graph.facebook.com/oauth/authorize?" + urllib.urlencode(args))
+    return HttpResponseRedirect(_get_next(request))
 
 def logout(request, redirect_url=None):
     """
@@ -252,7 +260,7 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
         except TwitterProfile.DoesNotExist: # There can only be one profile!
             profile = TwitterProfile.objects.create(user_id=request.user.pk,
                                                     twitter_id=user_info['id'])
-        
+
         return HttpResponseRedirect(_get_next(request))
 
     user = authenticate(twitter_id=user_info['id'])
@@ -279,7 +287,7 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
 
 def hyves(request):
     """
-    Actually setup/login an account relating to a hyves user after the oauth 
+    Actually setup/login an account relating to a hyves user after the oauth
     process is finished successfully
     """
     user_info = {}
@@ -289,7 +297,7 @@ def hyves(request):
         user_info['url'] = request.POST.get('url', '')
 
     user = authenticate(hyves_id=getattr(user_info, 'id', ''))
-    
+
     if user is None:
         profile = HyvesProfile(hyves_id=getattr(user_info, 'id', ''),
                                username=getattr(user_info, 'username', ''),
@@ -311,12 +319,12 @@ def hyves(request):
 
     login(request, user)
     request.user.message_set.create(message=_('You have succesfully been logged in with your hyves account'))
-    
+
     return HttpResponseRedirect(_get_next(request))
 
 def linkedin(request):
     """
-    Actually setup/login an account relating to a linkedin user after the oauth 
+    Actually setup/login an account relating to a linkedin user after the oauth
     process is finished successfully
     """
     client = OAuthLinkedin(
@@ -324,7 +332,7 @@ def linkedin(request):
         settings.LINKEDIN_CONSUMER_SECRET_KEY,
         settings.LINKEDIN_REQUEST_TOKEN_URL,
     )
-    
+
     user_info = client.get_user_info()
 
     user = authenticate(linkedin_id=user_info['id'])
@@ -341,7 +349,7 @@ def linkedin(request):
 
     login(request, user)
     request.user.message_set.create(message=_('You have succesfully been logged in with your linkedin account'))
-    
+
     return HttpResponseRedirect(_get_next(request))
 
 def oauth_redirect(request, consumer_key=None, secret_key=None,

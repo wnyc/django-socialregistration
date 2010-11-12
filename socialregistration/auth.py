@@ -55,7 +55,7 @@ class LinkedinAuth(Auth):
             ).user
         except:
             return None
-        
+
 class OpenIDAuth(Auth):
     def authenticate(self, identity=None):
         try:

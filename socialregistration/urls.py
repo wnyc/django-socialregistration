@@ -25,11 +25,14 @@ if getattr(settings, 'FACEBOOK_API_KEY', None) is not None:
             name='facebook_connect'),
 
         url('^facebook/graph/connect/$', 'socialregistration.views.facebook_graph_connect',
-            name='facebook_graph_connect'),                                        
+            name='facebook_graph_connect'),
+
+        url('^facebook/graph/login/$', 'socialregistration.views.facebook_graph_login',
+            name='facebook_graph_login'),
 
         url('^xd_receiver.htm$', 'django.views.generic.simple.direct_to_template',
             {'template':'socialregistration/xd_receiver.html'},
-            name='facebook_xd_receiver'),                                    
+            name='facebook_xd_receiver'),
     )
 
 #Setup Twitter URLs if there's an API key specified
@@ -67,7 +70,7 @@ if getattr(settings, 'HYVES_CONSUMER_KEY', None) is not None:
             name='hyves_connect'),
         url('^hcrpc_relay.html$', 'django.views.generic.simple.direct_to_template',
             {'template':'socialregistration/hcrpc_relay.html'},
-            name='hyves_hcrpc_relay'),                                         
+            name='hyves_hcrpc_relay'),
     )
 
 #Setup Linkedin URLs if there's an API key specified
@@ -82,7 +85,7 @@ if getattr(settings, 'LINKEDIN_CONSUMER_KEY', None) is not None:
                 authorization_url=settings.LINKEDIN_AUTHORIZATION_URL,
             ),
             name='linkedin_redirect'),
-        
+
         url('^linkedin/callback/$', 'socialregistration.views.oauth_callback',
             dict(
                 consumer_key=settings.LINKEDIN_CONSUMER_KEY,
@@ -97,7 +100,7 @@ if getattr(settings, 'LINKEDIN_CONSUMER_KEY', None) is not None:
         ),
         url('^linkedin/$', 'socialregistration.views.linkedin', name='linkedin'),
     )
-    
+
 # Setup FriendFeed URLs if there's an API key specified
 if getattr(settings, 'FRIENDFEED_CONSUMER_KEY', None) is not None:
     urlpatterns = urlpatterns + patterns('',
