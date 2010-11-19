@@ -362,13 +362,16 @@ def oauth_redirect(request, consumer_key=None, secret_key=None,
 def oauth_callback(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
     callback_url=None, template='socialregistration/oauthcallback.html',
-    extra_context=dict(), parameters=None):
+    extra_context=dict(), verifier=None, parameters=None):
     """
     View to handle final steps of OAuth based authentication where the user
     gets redirected back to from the service provider
     """
+    if request.GET.get('oauth_verifier', None):
+        verifier = request.GET.get('oauth_verifier')
+
     client = OAuthClient(request, consumer_key, secret_key, request_token_url,
-        access_token_url, authorization_url, callback_url, parameters)
+        access_token_url, authorization_url, callback_url, verifier, parameters)
 
     extra_context.update(dict(oauth_client=client))
 
