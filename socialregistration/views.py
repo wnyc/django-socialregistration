@@ -103,73 +103,19 @@ def setup(request, template='socialregistration/setup.html',
 if has_csrf:
     setup = csrf_protect(setup)
 
-# Will be deprecated in further releases
-def facebook_login(request, template='socialregistration/facebook.html',
-    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
-    """
-    View to handle the Facebook login
-    """
-    if request.facebook.uid is None:
-        extra_context.update(dict(error=FB_ERROR))
-        return render_to_response(template, extra_context,
-            context_instance=RequestContext(request))
-
-    user = authenticate(uid=request.facebook.uid)
-
-    if user is None:
-        request.session['socialregistration_user'] = User()
-        fb_profile = request.facebook.graph.get_object("me")
-        request.session['socialregistration_profile'] = FacebookProfile(
-            uid=request.facebook.uid,
-            username=fb_profile['name'],
-            )
-        request.session['next'] = _get_next(request)
-
-        return HttpResponseRedirect(reverse('socialregistration_setup'))
-
-    if not user.is_active:
-        return render_to_response(
-            account_inactive_template,
-            extra_context,
-            context_instance=RequestContext(request)
-        )
-
-    login(request, user)
-
-    return HttpResponseRedirect(_get_next(request))
-
-# Will be deprecated in further releases
-def facebook_connect(request, template='socialregistration/facebook.html',
-    extra_context=dict()):
-    """
-    View to handle connecting existing accounts with facebook
-    """
-    if request.facebook.uid is None or request.user.is_authenticated() is False:
-        extra_context.update(dict(error=FB_ERROR))
-        return render_to_response(template, extra_context,
-            context_instance=RequestContext(request))
-
-    try:
-        profile = FacebookProfile.objects.get(uid=request.facebook.uid)
-    except FacebookProfile.DoesNotExist:
-        profile = FacebookProfile.objects.create(user=request.user,
-            uid=request.facebook.uid)
-
-    return HttpResponseRedirect(_get_next(request))
-
-def facebook_graph_login(request):
+def facebook_login(request):
     """ Handle the login """
     params = {}
     params['client_id'] = settings.FACEBOOK_APP_ID
-    params['redirect_uri'] = request.build_absolute_uri(reverse('facebook_graph_connect'))
+    params['redirect_uri'] = request.build_absolute_uri(reverse('facebook_connect'))
     params['display'] = getattr(settings, 'FACEBOOK_DISPLAY', 'popup')
 
     url = 'https://graph.facebook.com/oauth/authorize?' + urllib.urlencode(params)
 
     return HttpResponseRedirect(url)
 
-def facebook_graph_connect(request, template='socialregistration/facebook.html',
-                           extra_context=dict()):
+def facebook_connect(request, template='socialregistration/facebook.html',
+                     extra_context=dict()):
     """
     View to handle graph connecting
 
@@ -186,7 +132,7 @@ def facebook_graph_connect(request, template='socialregistration/facebook.html',
         params = {}
         params["client_id"] = settings.FACEBOOK_APP_ID
         params["client_secret"] = settings.FACEBOOK_SECRET_KEY
-        params["redirect_uri"] = request.build_absolute_uri(reverse("facebook_graph_connect"))
+        params["redirect_uri"] = request.build_absolute_uri(reverse("facebook_connect"))
         params["code"] = request.GET.get('code', '')
 
         url = "https://graph.facebook.com/oauth/access_token?"+urllib.urlencode(params)
