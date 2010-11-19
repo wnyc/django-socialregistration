@@ -51,6 +51,23 @@ Twitter
     {% load twitter_tags %}
     {% twitter_button %}
 
+LinkedIn
+-------
+#. Add the following variables to your ``settings.py`` file with the values you were given by LinkedIn::
+
+    LINKEDIN_CONSUMER_KEY
+    LINKEDIN_CONSUMER_SECRET_KEY
+    LINKEDIN_REQUEST_TOKEN_URL
+    LINKEDIN_ACCESS_TOKEN_URL
+    LINKEDIN_AUTHORIZATION_URL
+
+#. Add ``socialregistration.auth.LinkedinAuth`` to ``AUTHENTICATION_BACKENDS`` in your settings file.
+
+#. Add tags to your template file::
+
+    {% load linkedin_tags %}
+    {% linkedin_button %}
+
 Other OAuth Services
 --------------------
 There is an example of how FriendFeed integration could work.
