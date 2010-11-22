@@ -247,6 +247,18 @@ def hyves(request):
         user_info['username'] = request.POST.get('username', '')
         user_info['url'] = request.POST.get('url', '')
 
+    if request.user.is_authenticated():
+        # Handling already logged in users connecting their accounts
+        try:
+            profile = HyvesProfile.objects.get(hyves_id=user_info['id'])
+        except HyvesProfile.DoesNotExist: # There can only be one profile!
+            profile = HyvesProfile.objects.create(user=request.user,
+                                                  hyves_id=user_info['id'],
+                                                  username=user_info['username'],
+                                                  url=user_info['url'])
+
+        return HttpResponseRedirect(_get_next(request))
+
     user = authenticate(hyves_id=getattr(user_info, 'id', ''))
 
     if user is None:
