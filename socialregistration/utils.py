@@ -309,20 +309,14 @@ class OAuthLinkedin(OAuth):
     """
     Verifying linkedin credentials
     """
-    url = 'http://api.linkedin.com/v1/people/~'
+    url = 'http://api.linkedin.com/v1/people/~:(id,first-name,last-name)'
 
     def get_user_info(self):
         user = dict()
         user_xml = self.query(self.url)
 
         xml = minidom.parseString(user_xml)
-
-        user_url = xml.getElementsByTagName('url')[0].childNodes[0].nodeValue
-
-        reg = r'.*key=(?P<key>[\d]+)&.*'
-        match = re.match(reg, user_url)
-
-        user['id'] = '%(key)s' % {'key': match.group('key') }
+        user['id'] = xml.getElementsByTagName('id')[0].childNodes[0].nodeValue
         first_name = xml.getElementsByTagName('first-name')[0].childNodes[0].nodeValue
         last_name = xml.getElementsByTagName('last-name')[0].childNodes[0].nodeValue
 

@@ -146,19 +146,27 @@ def facebook_connect(request, template='socialregistration/facebook.html',
 
         access_token = res_parse_qs['access_token'][-1]
 
-        graph = facebook.GraphAPI(access_token)
-        uid = graph.get_object('me')['id']
+    graph = facebook.GraphAPI(access_token)
+    user_info = graph.get_object('me')
 
-    user = authenticate(uid=uid)
+    if request.user.is_authenticated():
+        # Handling already logged in users connecting their accounts
+        try:
+            profile = FacebookProfile.objects.get(uid=user_info['id'])
+        except FacebookProfile.DoesNotExist: # There can only be one profile!
+            profile = FacebookProfile.objects.create(user=request.user,
+                                                     uid=user_info['id'],
+                                                     username=user_info['name'])
+
+        return HttpResponseRedirect(_get_next(request))
+
+    user = authenticate(uid=user_info['id'])
 
     if not user:
-        graph = facebook.GraphAPI(access_token)
-        profile = graph.get_object("me")
-
         request.session['socialregistration_user'] = User()
         request.session['socialregistration_profile'] = FacebookProfile(
-                uid=uid,
-                username=profile['name'],
+                uid=user_info['id'],
+                username=user_info['name'],
             )
         request.session['next'] = _get_next(request)
 
@@ -200,7 +208,8 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
         try:
             profile = TwitterProfile.objects.get(twitter_id=user_info['id'])
         except TwitterProfile.DoesNotExist: # There can only be one profile!
-            profile = TwitterProfile.objects.create(user_id=request.user.pk,
+            profile = TwitterProfile.objects.create(user=request.user,
+                                                    user_id=request.user.pk,
                                                     twitter_id=user_info['id'])
 
         return HttpResponseRedirect(_get_next(request))
@@ -276,6 +285,17 @@ def linkedin(request):
     )
 
     user_info = client.get_user_info()
+
+    if request.user.is_authenticated():
+        # Handling already logged in users connecting their accounts
+        try:
+            profile = LinkedinProfile.objects.get(linkedin_id=user_info['id'])
+        except LinkedinProfile.DoesNotExist: # There can only be one profile!
+            profile = LinkedinProfile.objects.create(user=request.user,
+                                                     linkedin_id=user_info['id'],
+                                                     username=user_info['screen_name'])
+
+        return HttpResponseRedirect(_get_next(request))
 
     user = authenticate(linkedin_id=user_info['id'])
 
