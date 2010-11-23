@@ -103,7 +103,7 @@ def setup(request, template='socialregistration/setup.html',
 if has_csrf:
     setup = csrf_protect(setup)
 
-def facebook_login(request, extra_context=dict()):
+def facebook_login(request):
     """ Handle the login """
     params = {}
     params['client_id'] = settings.FACEBOOK_APP_ID
@@ -135,6 +135,8 @@ def facebook_connect(request, template='socialregistration/facebook.html',
         params["client_secret"] = settings.FACEBOOK_SECRET_KEY
         params["redirect_uri"] = request.build_absolute_uri(reverse("facebook_connect"))
         params["code"] = request.GET.get('code', '')
+        params['display'] = getattr(settings, 'FACEBOOK_DISPLAY', 'popup')
+        params['scope'] = getattr(settings, 'FACEBOOK_SCOPE', '')
 
         url = "https://graph.facebook.com/oauth/access_token?"+urllib.urlencode(params)
         from cgi import parse_qs
