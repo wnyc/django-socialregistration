@@ -4,6 +4,7 @@ Created on 22.09.2009
 @author: alen
 """
 from django import template
+from django.conf import settings
 
 register = template.Library()
 
@@ -13,4 +14,4 @@ def twitter_button(context):
         raise AttributeError, 'Please add the ``django.core.context_processors.request`` context processors to your settings.CONTEXT_PROCESSORS set'
     logged_in = context['request'].user.is_authenticated()
     next = context['next'] if 'next' in context else None
-    return dict(next=next, logged_in=logged_in, request=context['request'])
+    return dict(next=next, logged_in=logged_in, request=context['request'], MEDIA_URL=settings.MEDIA_URL)
