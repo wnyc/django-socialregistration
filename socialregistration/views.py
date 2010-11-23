@@ -209,7 +209,6 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
             profile = TwitterProfile.objects.get(twitter_id=user_info['id'])
         except TwitterProfile.DoesNotExist: # There can only be one profile!
             profile = TwitterProfile.objects.create(user=request.user,
-                                                    user_id=request.user.pk,
                                                     twitter_id=user_info['id'])
 
         return HttpResponseRedirect(_get_next(request))
