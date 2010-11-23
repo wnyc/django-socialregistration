@@ -135,13 +135,12 @@ def facebook_connect(request, template='socialregistration/facebook.html',
         params["client_secret"] = settings.FACEBOOK_SECRET_KEY
         params["redirect_uri"] = request.build_absolute_uri(reverse("facebook_connect"))
         params["code"] = request.GET.get('code', '')
-        params['display'] = getattr(settings, 'FACEBOOK_DISPLAY', 'popup')
-        params['scope'] = getattr(settings, 'FACEBOOK_SCOPE', '')
 
         url = "https://graph.facebook.com/oauth/access_token?"+urllib.urlencode(params)
         from cgi import parse_qs
         userdata = urllib.urlopen(url).read()
         res_parse_qs = parse_qs(userdata)
+
         # Could be a bot query
         if not res_parse_qs.has_key('access_token'):
             return render_to_response(template, extra_context,
