@@ -158,7 +158,11 @@ def facebook_connect(request, template='socialregistration/facebook.html',
         except FacebookProfile.DoesNotExist: # There can only be one profile!
             profile = FacebookProfile.objects.create(user=request.user,
                                                      uid=user_info['id'],
-                                                     username=user_info['name'])
+                                                     username=user_info['name'],
+                                                     access_token=access_token)
+        else:
+            profile.access_token = access_token
+            profile.save()
 
         return HttpResponseRedirect(_get_next(request))
 
@@ -169,6 +173,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
         request.session['socialregistration_profile'] = FacebookProfile(
                 uid=user_info['id'],
                 username=user_info['name'],
+                access_token=access_token
             )
         request.session['next'] = _get_next(request)
 

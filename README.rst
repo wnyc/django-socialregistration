@@ -28,7 +28,6 @@ Facebook Graph API Connect
 #.  This new version will support desktop as well as mobile. Use ``FACEBOOK_DISPLAY`` in your settings file to serve the different platforms. Possibilities: (``touch``, ``wap``, default: ``popup``)
 #.  Add ``FACEBOOK_APP_ID`` and ``FACEBOOK_SECRET_KEY`` to your settings file representing the app id and the secret key you were given by Facebook.
 #.  Add ``socialregistration.auth.FacebookAuth`` to ``AUTHENTICATION_BACKENDS`` in your settings file.
-#.  Add ``socialregistration.middleware.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES`` in your settings file.
 #.  Add tags to your template file::
 
 	{% load facebook_tags %} 

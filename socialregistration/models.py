@@ -32,19 +32,20 @@ class SocialProfile(models.Model):
 
 class FacebookProfile(SocialProfile):
     uid = models.CharField(max_length=255, blank=False, null=False)
-    
+    access_token = models.CharField(max_length=255, blank=True, null=True)
+
     def __unicode__(self):
         return u'%s: %s' % (self.user, self.uid)
-    
+
     def authenticate(self):
         return authenticate(uid=self.uid)
 
 class TwitterProfile(SocialProfile):
     twitter_id = models.PositiveIntegerField()
-    
+
     def __unicode__(self):
         return u'%s: %s' % (self.user, self.twitter_id)
-    
+
     def authenticate(self):
         return authenticate(twitter_id=self.twitter_id)
 
@@ -74,7 +75,7 @@ class FriendFeedProfile(models.Model):
 
 class OpenIDProfile(SocialProfile):
     identity = models.TextField()
-    
+
     def authenticate(self):
         return authenticate(identity=self.identity)
 
@@ -92,4 +93,4 @@ class OpenIDNonce(models.Model):
     timestamp = models.IntegerField()
     salt = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
-    
+
