@@ -76,7 +76,8 @@ def setup(request, template='socialregistration/setup.html',
 
                 return HttpResponseRedirect(_get_next(request))
 
-        extra_context.update(dict(form=form))
+        extra_context.update(dict(form=form,
+                                  social_type=str(type(social_profile))))
 
         return render_to_response(
             template,
