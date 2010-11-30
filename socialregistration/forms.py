@@ -8,6 +8,8 @@ from django.utils.translation import gettext as _
 
 from django.contrib.auth.models import User
 
+attrs_dict = {'class': 'required'}
+
 class UserForm(forms.Form):
     username = forms.RegexField(regex=r'^\w+$',
                                 max_length=30,
