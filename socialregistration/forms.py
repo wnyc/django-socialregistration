@@ -9,14 +9,18 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.models import User
 
 class UserForm(forms.Form):
-    username = forms.RegexField(r'\w+', max_length=255,)
+    username = forms.RegexField(regex=r'^\w+$',
+                                max_length=30,
+                                widget=forms.TextInput(attrs=attrs_dict),
+                                label=_("Username"),
+                                error_messages={'invalid': _('Username must contain only letters, numbers and underscores.')})
     email = forms.EmailField(required=True)
-    
+
     def __init__(self, user, profile, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
         self.user = user
         self.profile = profile
-    
+
     def clean_username(self):
         username = self.cleaned_data.get('username')
         try:
@@ -34,11 +38,11 @@ class UserForm(forms.Form):
             return email
         else:
             raise forms.ValidationError(_('This e-mailaddress is already in use.'))
-    
+
     def save(self):
         self.user.username = self.cleaned_data.get('username')
         self.user.email = self.cleaned_data.get('email')
         self.user.save()
         self.profile.user = self.user
-        self.profile.save()        
+        self.profile.save()
         return self.user
