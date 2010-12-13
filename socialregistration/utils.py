@@ -82,6 +82,12 @@ class OpenIDStore(OIDStore):
 
         return assoc
 
+    def removeAssociation(self, server_url, handle):
+        OpenIDStoreModel.objects.filter(
+            server_url=server_url,
+            handle=handle
+        ).delete()
+
     def useNonce(self, server_url, timestamp, salt):
         try:
             nonce = OpenIDNonce.objects.get(
