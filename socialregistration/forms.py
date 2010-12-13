@@ -32,15 +32,6 @@ class UserForm(forms.Form):
         else:
             raise forms.ValidationError(_('This username is already in use.'))
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return email
-        else:
-            raise forms.ValidationError(_('This e-mailaddress is already in use.'))
-
     def save(self):
         self.user.username = self.cleaned_data.get('username')
         self.user.email = self.cleaned_data.get('email')
