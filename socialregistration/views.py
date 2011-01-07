@@ -5,6 +5,8 @@ Created on 22.09.2009
 """
 import uuid, urllib, cgi, facebook
 
+from openid.consumer.consumer import DiscoveryFailure
+
 from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
@@ -375,6 +377,7 @@ def openid_redirect(request):
     request.session['next'] = _get_next(request)
     request.session['openid_provider'] = request.GET.get('openid_provider')
 
+    provider = request.GET.get('openid_provider')
     client = OpenID(
         request,
         'http%s://%s%s' % (
@@ -382,9 +385,16 @@ def openid_redirect(request):
             Site.objects.get_current().domain,
             reverse('openid_callback')
         ),
-        request.GET.get('openid_provider')
+        provider
     )
-    return client.get_redirect()
+    try:
+        return client.get_redirect()
+    except DiscoveryFailure:
+        return render_to_response(
+            'socialregistration/provider_failure.html',
+            dict(provider=provider),
+            context_instance=RequestContext(request)
+        )
 
 def openid_callback(request, template='socialregistration/openid.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
