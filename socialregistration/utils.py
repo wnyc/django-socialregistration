@@ -331,3 +331,7 @@ class OAuthLinkedin(OAuth):
 
         return user
 
+def xrds_url():
+    return 'http%s://%s%s' % (_https(),
+                              Site.objects.get_current().domain,
+                              reverse('socialregistration.views.return_to'))

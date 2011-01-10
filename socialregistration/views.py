@@ -370,6 +370,16 @@ def oauth_callback(request, consumer_key=None, secret_key=None,
     # We're redirecting to the setup view for this oauth service
     return HttpResponseRedirect(reverse(client.callback_url))
 
+def return_to(request):
+    """
+    An xrds file that OpenID providers such as Yahoo! use to verify your site.
+    """
+    return render_to_response(
+        'socialregistration/return_to.xrds',
+        dict(return_to=_openid_callback_url()),
+        context_instance=RequestContext(request)
+    )
+
 def openid_redirect(request):
     """
     Redirect the user to the openid provider
@@ -380,11 +390,7 @@ def openid_redirect(request):
     provider = request.GET.get('openid_provider')
     client = OpenID(
         request,
-        'http%s://%s%s' % (
-            _https(),
-            Site.objects.get_current().domain,
-            reverse('openid_callback')
-        ),
+        _openid_callback_url(),
         provider
     )
     try:
@@ -396,6 +402,13 @@ def openid_redirect(request):
             context_instance=RequestContext(request)
         )
 
+def _openid_callback_url():
+    return 'http%s://%s%s' % (
+        _https(),
+        Site.objects.get_current().domain,
+        reverse('openid_callback')
+    )
+
 def openid_callback(request, template='socialregistration/openid.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
     """
@@ -403,11 +416,7 @@ def openid_callback(request, template='socialregistration/openid.html',
     """
     client = OpenID(
         request,
-        'http%s://%s%s' % (
-            _https(),
-            Site.objects.get_current().domain,
-            reverse('openid_callback')
-        ),
+        _openid_callback_url(),
         request.session.get('openid_provider')
     )
 
