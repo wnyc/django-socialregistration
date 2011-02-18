@@ -50,6 +50,21 @@ def _get_next(request):
     else:
         return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
+def successful_account_link(request, profile):
+    if isinstance(profile, OpenIDProfile):
+        provider_login = "OpenID Login"
+        for provider in ("google", "yahoo",):
+            if profile.identity.find(provider) >= 0:
+                provider_login = provider[0].upper() + provider[1:] + " Login"
+    else:
+        provider_login = profile._meta.object_name.replace("Profile", " Login")
+    return render_to_response(
+        "socialregistration/successful_account_link.html",
+        dict(provider_login=provider_login,
+             next=_get_next(request),
+             username=profile.user.username),
+        context_instance=RequestContext(request))
+
 def setup(request, template='socialregistration/setup.html',
     form_class=UserForm, extra_context=dict()):
     """
@@ -167,7 +182,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
             profile.access_token = access_token
             profile.save()
 
-        return HttpResponseRedirect(_get_next(request))
+        return successful_account_link(request, profile)
 
     user = authenticate(uid=user_info['id'])
 
@@ -221,7 +236,7 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
             profile = TwitterProfile.objects.create(user=request.user,
                                                     twitter_id=user_info['id'])
 
-        return HttpResponseRedirect(_get_next(request))
+        return successful_account_link(request, profile)
 
     user = authenticate(twitter_id=user_info['id'])
 
@@ -266,7 +281,7 @@ def hyves(request):
                                                   username=user_info['username'],
                                                   url=user_info['url'])
 
-        return HttpResponseRedirect(_get_next(request))
+        return successful_account_link(request, profile)
 
     user = authenticate(hyves_id=getattr(user_info, 'id', ''))
 
@@ -316,7 +331,7 @@ def linkedin(request):
                                                      linkedin_id=user_info['id'],
                                                      username=user_info['screen_name'])
 
-        return HttpResponseRedirect(_get_next(request))
+        return successful_account_link(request, profile)
 
     user = authenticate(linkedin_id=user_info['id'])
 
@@ -430,7 +445,7 @@ def openid_callback(request, template='socialregistration/openid.html',
                 profile = OpenIDProfile.objects.create(user=request.user,
                     identity=identity)
 
-            return HttpResponseRedirect(_get_next(request))
+            return successful_account_link(request, profile)
 
         user = authenticate(identity=identity)
         if user is None:
