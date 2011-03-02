@@ -269,15 +269,25 @@ class OAuth(object):
 
         self.request_token_url = request_token_url
 
+    def get_access_token_or_none(self):
+        """
+        Get the saved access token for private resources from the session.
+        Return None if there isn't one.
+        """
+        return self.request.session.get(
+            'oauth_%s_access_token' % get_token_prefix(self.request_token_url),
+            None)
+
     def _get_at_from_session(self):
         """
         Get the saved access token for private resources from the session.
+        Raise an exception if there isn't one.
         """
-        try:
-            return self.request.session['oauth_%s_access_token' % get_token_prefix(self.request_token_url)]
-        except KeyError:
+        got = self.get_access_token_or_none()
+        if not got:
             raise OAuthError(
                 _('No access token saved for "%s".') % get_token_prefix(self.request_token_url))
+        return got
 
     def query(self, url, method="GET", params=dict(), headers=dict()):
         """

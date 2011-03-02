@@ -226,6 +226,9 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
         settings.TWITTER_REQUEST_TOKEN_URL,
     )
 
+    if not client.get_access_token_or_none():
+        return HttpResponseRedirect(_get_next(request))
+
     user_info = client.get_user_info()
 
     if request.user.is_authenticated():
@@ -319,6 +322,11 @@ def linkedin(request):
         settings.LINKEDIN_CONSUMER_SECRET_KEY,
         settings.LINKEDIN_REQUEST_TOKEN_URL,
     )
+
+    # Perhaps the user typed in this url, or logged out from this page after
+    # successfully linking accounts.
+    if not client.get_access_token_or_none():
+        return HttpResponseRedirect(_get_next(request))
 
     user_info = client.get_user_info()
 
@@ -434,6 +442,9 @@ def openid_callback(request, template='socialregistration/openid.html',
         _openid_callback_url(),
         request.session.get('openid_provider')
     )
+
+    if not client.get_access_token_or_none():
+        return HttpResponseRedirect(_get_next(request))
 
     if client.is_valid():
         identity = client.result.identity_url
