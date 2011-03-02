@@ -443,9 +443,6 @@ def openid_callback(request, template='socialregistration/openid.html',
         request.session.get('openid_provider')
     )
 
-    if not client.get_access_token_or_none():
-        return HttpResponseRedirect(_get_next(request))
-
     if client.is_valid():
         identity = client.result.identity_url
         if request.user.is_authenticated():
