@@ -3,8 +3,7 @@ Created on 22.09.2009
 
 @author: alen
 """
-import uuid, urllib, cgi, facebook
-from random import randrange
+import uuid, urllib, cgi, facebook, time, re
 
 from openid.consumer.consumer import DiscoveryFailure
 
@@ -53,9 +52,11 @@ def _get_next(request):
         to_return = next
     else:
         to_return = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+    tail = "DoNotCache=" + str(time.time())
     if to_return.find("DoNotCache") == -1:
-        tail = "DoNotCache=%d" % randrange(1, 1000)
         to_return += ("&" if to_return.find("?") > 0 else "?") + tail
+    else:
+        to_return = re.compile(r"DoNotCache=[\.\d]*").sub(tail, to_return)
     return to_return
 
 def successful_account_link(request, profile):
