@@ -437,6 +437,9 @@ def openid_callback(request, template='socialregistration/openid.html',
     """
     Catches the user when he's redirected back from the provider to our site
     """
+    if request.GET.get("openid.mode", "") == "cancel":
+        return HttpResponseRedirect(_get_next(request))
+
     client = OpenID(
         request,
         _openid_callback_url(),
