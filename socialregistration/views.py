@@ -4,6 +4,7 @@ Created on 22.09.2009
 @author: alen
 """
 import uuid, urllib, cgi, facebook
+from random import randrange
 
 from openid.consumer.consumer import DiscoveryFailure
 
@@ -37,18 +38,25 @@ GENERATE_USERNAME = bool(getattr(settings, 'SOCIAL_GENERATE_USERNAME', getattr(
 
 def _get_next(request):
     """
-    Returns a url to redirect to after the login
+    Returns a url to redirect to after the login. We had problems with Safari
+    on mac caching the home page after a login, which appears as if the user
+    hasn't logged in.
     """
+    to_return = ""
     if 'next' in request.GET:
-        return request.GET.get('next')
+        to_return = request.GET.get('next')
     elif 'next' in request.POST:
-        return request.POST.get('next')
+        to_return = request.POST.get('next')
     elif 'next' in request.session:
         next = request.session['next']
         del request.session['next']
-        return next
+        to_return = next
     else:
-        return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+        to_return = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+    if to_return.find("DoNotCache") == -1:
+        tail = "DoNotCache=%d" % randrange(1, 1000)
+        to_return += ("&" if to_return.find("?") > 0 else "?") + tail
+    return to_return
 
 def successful_account_link(request, profile):
     if isinstance(profile, OpenIDProfile):
