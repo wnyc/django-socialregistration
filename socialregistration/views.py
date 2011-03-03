@@ -141,6 +141,10 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     Authorize and create user if none
 
     """
+
+    if request.GET.get("error_reason", "") == "user_denied":
+        return HttpResponseRedirect(_get_next(request))
+
     cookie = facebook.get_user_from_cookie(request.COOKIES, settings.FACEBOOK_API_KEY, settings.FACEBOOK_SECRET_KEY)
     if cookie:
         uid = cookie['uid']
