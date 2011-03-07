@@ -83,8 +83,8 @@ def setup(request, template='socialregistration/setup.html',
         social_user = request.session['socialregistration_user']
         social_profile = request.session['socialregistration_profile']
     except KeyError:
-        return render_to_response(
-            template, dict(error=True), context_instance=RequestContext(request))
+        # The user jumped directly here somehow. Just go back home.
+        return HttpResponseRedirect(_get_next(request))
 
     if not GENERATE_USERNAME:
         # User can pick own username
