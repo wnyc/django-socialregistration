@@ -123,7 +123,14 @@ class OpenID(object):
         self.result = None
 
     def get_redirect(self):
-        auth_request = self.consumer.begin(self.endpoint)
+        try:
+            auth_request = self.consumer.begin(self.endpoint)
+        except AttributeError:
+            # On very rare occasions we get "AttributeError: 'NoneType' object
+            # has no attribute 'startswith'" deep in the bowels of the openid
+            # python module. Just redirect home in that case. It's probably
+            # something weird like a service goes down or a session expires.
+            return HttpResponseRedirect("/")
         redirect_url = auth_request.redirectURL(
             'http%s://%s/' % (_https(), Site.objects.get_current().domain),
             self.return_to
