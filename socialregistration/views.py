@@ -10,6 +10,7 @@ from openid.consumer.consumer import DiscoveryFailure
 from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+from django.db.models.query import CollectedObjects
 from django.shortcuts import render_to_response
 from django.utils.translation import gettext as _
 from django.http import HttpResponseRedirect
@@ -184,16 +185,22 @@ def facebook_connect(request, template='socialregistration/facebook.html',
 
     if request.user.is_authenticated():
         # Handling already logged in users connecting their accounts
-        try:
-            profile = FacebookProfile.objects.get(uid=user_info['id'])
-        except FacebookProfile.DoesNotExist: # There can only be one profile!
+        profiles = FacebookProfile.objects.filter(uid=user_info['id'])
+        if profiles:
+            profile = profiles[0]
+            profile.access_token = access_token
+            profile.save()
+            # Ideally, there can only be one profile. Every once in a blue moon
+            # someone manages to create multiple profiles for the same facebook
+            # login. We still haven't figured out how as it isn't anything
+            # obvious. We haven't figured out what to do about it in that case
+            # either. Perhaps we should pick the best candidate and replace
+            # all foreign keys for the losing candidate.
+        else:
             profile = FacebookProfile.objects.create(user=request.user,
                                                      uid=user_info['id'],
                                                      username=user_info['name'],
                                                      access_token=access_token)
-        else:
-            profile.access_token = access_token
-            profile.save()
 
         return successful_account_link(request, profile)
 
