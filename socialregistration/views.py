@@ -195,7 +195,16 @@ def facebook_connect(request, template='socialregistration/facebook.html',
             # someone manages to create multiple profiles for the same facebook
             # login. We still haven't figured out how as it isn't anything
             # obvious. We haven't figured out what to do about it in that case
-            # either. For now, moderate manually.
+            # either. For now, moderate manually. Here is a query to find these
+            # dupes manually:
+            """
+            SELECT socialregistration_facebookprofile.uid, socialprofile_ptr_id
+            FROM socialregistration_facebookprofile
+            JOIN (SELECT COUNT(1) AS cnt, uid FROM
+            socialregistration_facebookprofile GROUP BY UID) AS iq
+            ON iq.uid = socialregistration_facebookprofile.uid
+            WHERE iq.cnt > 1 ORDER BY socialregistration_facebookprofile.uid;
+            """
             if len(profiles) > 1:
                 usernames = ", ".join([p.username for p in profiles])
                 subj = "Duplicate facebook profiles: %s" % usernames
