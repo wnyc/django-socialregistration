@@ -8,6 +8,7 @@ import uuid, urllib, cgi, facebook, time, re
 from openid.consumer.consumer import DiscoveryFailure
 
 from django.conf import settings
+from django.core.mail import mail_admins
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.db.models.query import CollectedObjects
@@ -194,8 +195,14 @@ def facebook_connect(request, template='socialregistration/facebook.html',
             # someone manages to create multiple profiles for the same facebook
             # login. We still haven't figured out how as it isn't anything
             # obvious. We haven't figured out what to do about it in that case
-            # either. Perhaps we should pick the best candidate and replace
-            # all foreign keys for the losing candidate.
+            # either. For now, moderate manually.
+            if len(profiles) > 1:
+                usernames = ", ".join([p.username for p in profiles])
+                subj = "Duplicate facebook profiles: %s" % usernames
+                uids = ", ".join([str(p.uid) for p in profiles])
+                msg = ("FacebookProfiles %s all have the same uid. Merge them "
+                       "so the user won't have issues.") % uids
+                mail_admins(subj, msg, fail_silently=False)
         else:
             profile = FacebookProfile.objects.create(user=request.user,
                                                      uid=user_info['id'],
