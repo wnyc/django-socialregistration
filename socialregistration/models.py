@@ -51,8 +51,8 @@ class TwitterProfile(SocialProfile):
 
 class HyvesProfile(SocialProfile):
     hyves_id = models.CharField(max_length=255, blank=False, null=False)
-    avatar = models.URLField(verify_exists=False, max_length=255, blank=True)
-    url = models.URLField(verify_exists=False, max_length=255, blank=True)
+    avatar = models.URLField(max_length=255, blank=True)
+    url = models.URLField(max_length=255, blank=True)
 
     def __unicode__(self):
         return '%s: %s' % (self.user, self.hyves_id)
