@@ -3,14 +3,14 @@ from setuptools import setup,find_packages
 
 METADATA = dict(
     name='django-socialregistration',
-    version='0.4.2',
+    version='0.4.4',
     author='Alen Mujezinovic',
     author_email='alen@caffeinehit.com',
     description='Django application enabling registration through a variety of APIs',
     long_description=open('README.rst').read(),
     url='http://github.com/flashingpumpkin/django-socialregistration',
     keywords='django facebook twitter oauth openid registration',
-    install_requires=['django', 'oauth2', 'python-openid'],
+    install_requires=['Django', 'oauth2', 'python-openid'],
     include_package_data=True,
     classifiers=[
         'Development Status :: 4 - Beta',
