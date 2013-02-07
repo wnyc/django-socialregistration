@@ -11,7 +11,6 @@ from django.conf import settings
 from django.core.mail import mail_admins
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
-from django.db.models.query import CollectedObjects
 from django.shortcuts import render_to_response
 from django.utils.translation import gettext as _
 from django.http import HttpResponseRedirect
