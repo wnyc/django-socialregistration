@@ -75,6 +75,19 @@ def successful_account_link(request, profile):
              username=profile.user.username),
         context_instance=RequestContext(request))
 
+
+def _cleanup_session(request):
+    # This originally simply deleted the session variables. We got a really
+    # frustrating, difficult to reproduce bug from time to time that these
+    # didn't exist any more at this point, causing a key error. I really wish
+    # we'd figured out the underlying cause, but let's just go with this for
+    # now and hope we never see it again.
+    for key in ('socialregistration_user',
+                'socialregistration_profile'):
+        if key in request.session:
+            del request.session[key]
+
+
 def setup(request, template='socialregistration/setup.html',
     form_class=UserForm, extra_context=dict()):
     """
@@ -97,10 +110,7 @@ def setup(request, template='socialregistration/setup.html',
                 form.save()
                 user = form.profile.authenticate()
                 login(request, user)
-
-                del request.session['socialregistration_user']
-                del request.session['socialregistration_profile']
-
+                _cleanup_session(request)
                 return HttpResponseRedirect(_get_next(request))
 
         extra_context.update(dict(form=form,
@@ -124,8 +134,7 @@ def setup(request, template='socialregistration/setup.html',
         login(request, user)
 
         # Clear & Redirect
-        del request.session['socialregistration_user']
-        del request.session['socialregistration_profile']
+        _cleanup_session(request)
         return HttpResponseRedirect(_get_next(request))
 
 if has_csrf:
