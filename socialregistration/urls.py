@@ -5,6 +5,7 @@ Created on 22.09.2009
 """
 from django.conf import settings
 from django.conf.urls.defaults import *
+from django.views.generic.base import TemplateView
 
 urlpatterns = patterns('',
     url('^setup/$', 'socialregistration.views.setup',
@@ -24,7 +25,7 @@ if getattr(settings, 'FACEBOOK_API_KEY', None) is not None:
         url('^facebook/login/$', 'socialregistration.views.facebook_login',
             name='facebook_login'),
 
-        url('^xd_receiver.htm$', 'django.views.generic.simple.direct_to_template',
+        url('^xd_receiver.htm$', TemplateView.as_view(),
             {'template':'socialregistration/xd_receiver.html'},
             name='facebook_xd_receiver'),
     )
@@ -62,7 +63,7 @@ if getattr(settings, 'HYVES_CONSUMER_KEY', None) is not None:
     urlpatterns = urlpatterns + patterns('',
         url('^hyves/connect/$', 'socialregistration.views.hyves',
             name='hyves_connect'),
-        url('^hcrpc_relay.html$', 'django.views.generic.simple.direct_to_template',
+        url('^hcrpc_relay.html$', TemplateView.as_view(),
             {'template':'socialregistration/hcrpc_relay.html'},
             name='hyves_hcrpc_relay'),
     )
