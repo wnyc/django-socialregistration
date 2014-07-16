@@ -4,7 +4,7 @@ Created on 22.09.2009
 @author: alen
 """
 from django.conf import settings
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from django.views.generic.base import TemplateView
 
 urlpatterns = patterns('',
